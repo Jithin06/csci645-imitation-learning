@@ -1,0 +1,12 @@
+# large or regenerable files
+*.mp4
+*.gif
+*.hdf5
+*.h5
+*.npz
+*.pt
+checkpoints/
+data/
+wandb/
+__pycache__/
+.venv/
