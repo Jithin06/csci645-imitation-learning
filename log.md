@@ -26,4 +26,8 @@ Env facts:
 - no success flag in the env, need to define one for Part 1
 - seeds: reset 0, random actions 42 (same as README)
 
-Still to do: check GPU job output, make the zero-action video, record versions.
+## 2026-10-18: fixes
+- Part 0 job (13220880): `uv run` printed nothing on the compute node, so no videos were made. Fix: call `.venv/bin/python` directly in Slurm scripts.
+- Login node: OpenBLAS `pthread_create failed` (tries 32 threads). Fix: `export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1` (in ~/.bashrc); jobs use 4.
+- common.py pushed (3174ad5); CPU smoke test: zero actions, 2 envs, 20 steps.
+- common.py smoke test (salloc CPU node, 2 envs × 20 steps, zero actions): success 0.0, ep_len 20.0, final dist 0.475 m. Pass.
