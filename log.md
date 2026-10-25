@@ -1,33 +1,32 @@
 # HW2 log
 
-## Oct 17 - Part 0 (env setup)
+## Setup
+- Repo cloned on CARC at /scratch1/jrajan/645/hw2 (own deploy key for CARC).
+- MuJoCo Playground at commit d59156e, installed with `uv sync --frozen` (Python 3.12, PyTorch 2.9.1+cu128); not vendored into the repo.
+- Task: PandaPickCube, impl='jax', state observations.
+- obs: 66-D state; action: 8-D in [-1, 1], joint targets change by 0.04·a per step; control step 0.02 s; 150-step episodes (3 s).
+- Env has no success flag. Defined: box within 5 cm of target for 10 consecutive steps.
+- Seeds: demos 0–159, evaluation 100000–100049.
 
-Made a new repo for HW2 and cloned it on CARC at /scratch1/jrajan/645/hw2.
-Added a new deploy key for CARC (the HW1 one can't be reused on another repo).
+## Fixes
+- uv: `uv sync --locked` wanted to update the lockfile → used `--frozen` (installs exactly what uv.lock pins).
+- No GPU via salloc (queues full) → ran GPU checks as sbatch jobs.
+- No ffmpeg on compute nodes, MP4 save failed → `imageio-ffmpeg` in the venv + `use_bundled_ffmpeg()` in common.py.
+- Part 0 job 13220880: `uv run` printed nothing on the compute node, no videos → Slurm scripts call `.venv/bin/python` directly.
+- Login node: OpenBLAS/JAX `pthread_create failed` (thread limit) → `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1` in ~/.bashrc; anything importing JAX runs in a job or salloc; jobs use 4 threads.
+- d14-16: CUDA_ERROR_UNKNOWN at init (jobs 13230784, 13231385) → excluded.
+- P100 (job 13234704): PyTorch 2.9.1+cu128 has no sm_60 kernels ("no kernel image is available"); JAX is fine on P100 → pinned jobs to V100 (`--gpus-per-task=v100:1`).
+- Bus error at startup on d13-02 (13234726) and d14-09 (13407919), numpy ModuleNotFoundError on d14-09 (13407573); files intact, same code runs elsewhere → node-level /scratch1 read failures, both nodes excluded.
+- DataLoader: dropped worker processes (`num_workers=0`) to rule out shared-memory issues; same samples, same loss.
+- analyze_demos: action stats included zero padding after episode end → masked to valid steps, reran analysis.
 
-Cloned MuJoCo Playground next to it (commit d59156e) and installed it with uv.
-Not pushing Playground into my repo, just noting the commit.
-
-Using PandaPickCube with impl='jax', state observations.
-
-Errors:
-- ssh to GitHub was denied at first. I hadn't added the key under the repo's
-  deploy keys yet.
-- First push failed because nothing was committed yet (empty folders don't count).
-- `uv sync --locked` said the lockfile needs updating. Switched to `--frozen`,
-  which installs exactly what uv.lock pins.
-- Couldn't get a GPU with salloc (A40, V100, P100 all queued). Submitted the
-  GPU check + rollout as an sbatch job instead (slurm/part0.slurm).
-
-Env facts:
-- obs: 66-dim state (joint pos/vel, gripper pose, box pose, box-to-target error)
-- action: 8-dim in [-1, 1], changes joint targets by 0.04 * action each step
-- control step 0.02 s, episode is 150 steps (3 s)
-- no success flag in the env, need to define one for Part 1
-- seeds: reset 0, random actions 42 (same as README)
-
-## 2026-10-18: fixes
-- Part 0 job (13220880): `uv run` printed nothing on the compute node, so no videos were made. Fix: call `.venv/bin/python` directly in Slurm scripts.
-- Login node: OpenBLAS `pthread_create failed` (tries 32 threads). Fix: `export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1` (in ~/.bashrc); jobs use 4.
-- common.py pushed (3174ad5); CPU smoke test: zero actions, 2 envs, 20 steps.
-- common.py smoke test (salloc CPU node, 2 envs × 20 steps, zero actions): success 0.0, ep_len 20.0, final dist 0.475 m. Pass.
+## Results (held-out seeds 100000–100049, 50 episodes)
+- Collection (job 13230787): teacher 133/160 = 83.1%; kept first 100 successes, 92.9 ± 16.2 steps, 0 out of bounds; 107 s (~103 s JIT).
+- Teacher (job 13234627): 43/50 = 86%.
+- ACT, 100 demos: 30/50 = 60%; 40k steps, 2211 s on V100, final L1 0.031, KL ~5e-7 (latent collapsed); W&B run aojqzpob.
+- ACT, 50 demos: 17/50 = 34%; final L1 0.022.
+- ACT, 25 demos: pending (job 13423673).
+- ACT, 100 demos, no temporal ensembling: 28/50 = 56%; action jerk 0.099 vs 0.084 with ensembling.
+- Edge (x>0.8 or |y|>0.14, 26 eps) vs interior (24 eps): teacher 81/92%, ACT-100 35/88%, ACT-50 19/50%.
+- Failures (grasp / near-miss <15 cm): teacher 6/0, ACT-100 11/6, ACT-50 12/11.
+- Fisher exact p: ACT-100 edge vs interior 0.0002; ACT-100 vs teacher edge 0.002, interior 1.0; ACT-100 vs ACT-50 overall 0.016, interior 0.011; ensembling on vs off 0.84.
