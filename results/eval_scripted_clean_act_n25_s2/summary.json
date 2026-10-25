@@ -1,0 +1,20 @@
+{
+  "num_episodes": 50,
+  "success_rate": 0.24,
+  "num_success": 12,
+  "out_of_bounds": 0,
+  "ep_len_mean": 136.8,
+  "ep_len_std": 23.91819391174844,
+  "ep_len_success_mean": 95.0,
+  "final_dist_mean_m": 0.24544724822044373,
+  "policy": "student",
+  "ckpt": "runs/scripted_clean_act_n25_s2/model.pt",
+  "seeds": [
+    100000,
+    100049
+  ],
+  "eval_wall_s": 61.9,
+  "temporal_agg": true,
+  "device": "cuda",
+  "action_jerk_mean": 0.055627528578042984
+}

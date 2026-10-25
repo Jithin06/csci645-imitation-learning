@@ -1,0 +1,16 @@
+{
+  "chunk": 20,
+  "kl_weight": 10.0,
+  "obs_horizon": 1,
+  "action_horizon": 1,
+  "lr": 0.0001,
+  "weight_decay": 0.0001,
+  "batch_size": 256,
+  "steps": 40000,
+  "ema": 0.0,
+  "algo": "act",
+  "data": "/scratch1/jrajan/645/hw2/data/scripted_clean.npz",
+  "num_demos": 50,
+  "seed": 2,
+  "num_params": 10606920
+}
