@@ -23,11 +23,12 @@ from policies import build_policy
 from teachers import make_teacher
 
 class StudentPolicy:
-    """Wraps a trained ACT Policy for batched closed-loop execution.
+    """Wraps a trained ACT policy for batched closed-loop execution.
 
-    ACT: queries a new 20-step chunk every step and averages all predictions for the current
-         step with weights exp(-m * age) (temporal ensembling, Zhao et al. 2023, m = 0.01).
-         --no-temporal-agg executes each chunk open-loop instead.
+    Queries a new 20-step chunk every step and averages every prediction made for the current
+    step with weights exp(-m * i), where i = 0 is the oldest prediction (temporal ensembling as
+    in the ACT reference code, m = 0.01, so older predictions weigh slightly more).
+    --no-temporal-agg executes each chunk open-loop instead.
     """
 
     def __init__(self, ckpt, device, temporal_agg=True, m=0.01, exec_horizon=None):
@@ -42,6 +43,7 @@ class StudentPolicy:
         self.temporal_agg = temporal_agg
         self.m = m
         self.exec_h = exec_horizon or self.K
+        assert 1 <= self.exec_h <= self.K, f"--exec-horizon must be between 1 and the chunk length {self.K}"
 
     def reset(self, n):
         self.n, self.hist, self.queue = n, None, None
@@ -61,8 +63,8 @@ class StudentPolicy:
             self.buf[:, t, t:t + self.K] = chunk
             self.filled[:, t, t:t + self.K] = True
             mask = self.filled[:, : t + 1, t]                         # predictions made at steps <= t for step t
-            ages = torch.arange(0, t + 1, device=self.dev).float()    # weight exp(-m*q): oldest query q gets the largest
-            w = torch.exp(-self.m * ages)[None] * mask
+            query_idx = torch.arange(0, t + 1, device=self.dev).float()   # 0 = oldest prediction for step t
+            w = torch.exp(-self.m * query_idx)[None] * mask
             a = (self.buf[:, : t + 1, t] * w[..., None]).sum(1) / w.sum(1, keepdim=True)
             return a.cpu().numpy()
         if self.queue is None or self.qi >= self.exec_h:
