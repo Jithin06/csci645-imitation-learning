@@ -88,7 +88,8 @@ def main():
     ds = DemoDataset(obs, act, L, cfg["obs_horizon"], cfg["chunk"], obs_mean, obs_std)
     g = torch.Generator().manual_seed(args.seed)
     dl = torch.utils.data.DataLoader(ds, batch_size=cfg["batch_size"], shuffle=True, drop_last=True,
-                                     generator=g, num_workers=2, persistent_workers=True)
+                                     generator=g, num_workers=0)
+    assert len(dl) > 0, f"{len(ds)} samples < batch size {cfg['batch_size']}; lower --batch-size"
     print(f"{args.algo}: {len(kept)} demos, {len(ds)} samples, device={dev}")
 
     policy = build_policy(args.algo, cfg).to(dev)
@@ -118,6 +119,8 @@ def main():
         for batch in dl:
             batch = {k: v.to(dev, non_blocking=True) for k, v in batch.items()}
             loss, extra = policy.compute_loss(batch)
+            if not torch.isfinite(loss):
+                raise RuntimeError(f"non-finite loss at step {step}")
             opt.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(policy.parameters(), 10.0)

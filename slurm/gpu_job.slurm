@@ -9,7 +9,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=24G
-#SBATCH --gpus-per-task=1
+#SBATCH --gpus-per-task=v100:1
 #SBATCH --time=02:00:00
 #SBATCH --output=/scratch1/jrajan/645/slurm-logs/%x-%j.out
 #SBATCH --exclude=d14-16
