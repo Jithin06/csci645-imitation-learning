@@ -1,0 +1,20 @@
+{
+  "num_episodes": 50,
+  "success_rate": 0.86,
+  "num_success": 43,
+  "out_of_bounds": 0,
+  "ep_len_mean": 99.16,
+  "ep_len_std": 24.269618868041583,
+  "ep_len_success_mean": 90.88372093023256,
+  "final_dist_mean_m": 0.08516249805688858,
+  "policy": "scripted",
+  "ckpt": null,
+  "seeds": [
+    100000,
+    100049
+  ],
+  "eval_wall_s": 89.6,
+  "temporal_agg": true,
+  "device": "cuda",
+  "action_jerk_mean": 0.12455575168132782
+}

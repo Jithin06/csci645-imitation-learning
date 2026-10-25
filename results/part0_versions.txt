@@ -1,0 +1,12 @@
+brax                      0.14.2
+flax                      0.11.2
+imageio-ffmpeg            0.6.0
+jax                       0.6.2
+jax-cuda12-plugin         0.6.2
+jaxlib                    0.6.2
+mujoco                    3.6.0
+mujoco-mjx                3.6.0
+playground                0.2.0       /scratch1/jrajan/645/mujoco_playground
+warp-lang                 1.18.0
+name, driver_version
+Tesla V100-PCIE-32GB, 580.159.04

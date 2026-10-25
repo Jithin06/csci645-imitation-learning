@@ -1,0 +1,6 @@
+condition,policy,num_demos,seed,temporal_agg,teacher_success_collection,teacher_success_heldout,student_success,successes,eval_episodes,ep_len_mean,action_jerk,final_train_l1
+teacher_scripted,teacher,,,,,0.86,,43/50,50,99.2,0.1246,
+scripted_clean_act_n100_s0,ACT,100,0,True,0.83125,0.86,0.6,30/50,50,113.7,0.0836,0.0311
+scripted_clean_act_n100_s0_noTA,ACT,100,0,False,0.83125,0.86,0.56,28/50,50,117.6,0.0994,0.0311
+scripted_clean_act_n50_s0,ACT,50,0,True,0.83125,0.86,0.34,17/50,50,130.6,0.0733,0.022
+scripted_clean_act_n25_s0,ACT,25,0,True,0.83125,0.86,0.2,10/50,50,137.7,0.0565,0.0186
