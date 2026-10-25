@@ -11,8 +11,8 @@
 #SBATCH --mem=24G
 #SBATCH --gpus-per-task=v100:1
 #SBATCH --time=02:00:00
+#SBATCH --exclude=d14-16,d13-02,d14-09
 #SBATCH --output=/scratch1/jrajan/645/slurm-logs/%x-%j.out
-#SBATCH --exclude=d14-16
 
 set -euo pipefail
 HW=/scratch1/$USER/645/hw2
