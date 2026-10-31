@@ -19,6 +19,8 @@
 - Bus error at startup on d13-02 (13234726) and d14-09 (13407919), numpy ModuleNotFoundError on d14-09 (13407573); files intact, same code runs elsewhere → node-level /scratch1 read failures, both nodes excluded.
 - DataLoader: dropped worker processes (`num_workers=0`) to rule out shared-memory issues; same samples, same loss.
 - analyze_demos: action stats included zero padding after episode end → masked to valid steps, reran analysis.
+- Extra training seeds: n100 s1 = 0/50 (rerun eval also 0/50; model never closes the gripper, box never lifted; train L1 0.032 same as s0). n50 s1 = 32%. n25 s2 = 24%.
+- Persistent bus errors (exit 135) on d14-08 and d14-13 even with 3 retries; excluded along with d14-16, d14-09, d13-02.
 
 ## Results (held-out seeds 100000–100049, 50 episodes)
 - Collection (job 13230787): teacher 133/160 = 83.1%; kept first 100 successes, 92.9 ± 16.2 steps, 0 out of bounds; 107 s (~103 s JIT).
@@ -30,3 +32,5 @@
 - Edge (x>0.8 or |y|>0.14, 26 eps) vs interior (24 eps): teacher 81/92%, ACT-100 35/88%, ACT-50 19/50%.
 - Failures (grasp / near-miss <15 cm): teacher 6/0, ACT-100 11/6, ACT-50 12/11.
 - Fisher exact p: ACT-100 edge vs interior 0.0002; ACT-100 vs teacher edge 0.002, interior 1.0; ACT-100 vs ACT-50 overall 0.016, interior 0.011; ensembling on vs off 0.84.
+- Seeds (success on 50 held-out eps): n100 60/0/46% (mean 35±31; excl. s1 53%), n50 34/32/28% (31±3), n25 20/22/24% (22±2).
+  Pooled Fisher: 100v25 p=0.015, 50v25 p=0.09, 100v50 p=0.54 (p<0.001 excluding the collapsed n100 s1).
